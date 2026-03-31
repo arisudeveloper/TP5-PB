@@ -22,7 +22,8 @@ jobs:
       - name: Build e Teste Backend
         run: |
           cd TP4-PB-Backend
-          mvn clean package -DtestFailureIgnore=true
+          mvn clean package -DskipTests
+          mvn test -DtestFailureIgnore=true
 
       - name: Upload do JAR (Artefato)
         uses: actions/upload-artifact@v4
@@ -33,14 +34,14 @@ jobs:
       - name: Validar Link de Produção
         run: |
           echo "Verificando se o sistema está online no Railway..."
-          curl -I https://tp5-pb-production.up.railway.app/produtos || echo "Sistema Offline"add
+          curl -I https://tp5-pb-production.up.railway.app/produtos || echo "Sistema Offline"
 
       - name: Resumo
         if: always()
         run: |
           echo "## Relatório TP5 Concluído" >> $GITHUB_STEP_SUMMARY
-          echo "1. **Build:** Maven concluído com sucesso." >> $GITHUB_STEP_SUMMARY
-          echo "2. **Artefatos:** Arquivo JAR disponível para download." >> $GITHUB_STEP_SUMMARY
+          echo "1. **Build:** Maven executado." >> $GITHUB_STEP_SUMMARY
+          echo "2. **Artefatos:** Arquivo JAR e cobertura disponíveis." >> $GITHUB_STEP_SUMMARY
           echo "3. **Deploy:** Verificado no Railway." >> $GITHUB_STEP_SUMMARY
           echo "4. **Link:** https://frontend-production-ef1c.up.railway.app" >> $GITHUB_STEP_SUMMARY
 
