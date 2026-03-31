@@ -19,7 +19,7 @@ public class ProdutoSeleniumTest {
 
     private WebDriver driver;
     private WebDriverWait wait;
-    private final String URL_FRONT = "http://localhost:5173";
+    private final String URL_FRONT = "https://frontend-production-ef1c.up.railway.app";
 
     @BeforeEach
     void setup() {

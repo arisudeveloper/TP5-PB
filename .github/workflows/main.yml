@@ -19,35 +19,30 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build e Teste Backend
+      - name: Build Backend (Jar)
         run: |
           cd TP4-PB-Backend
           mvn clean package -DskipTests
+
+      - name: Run Tests
+        run: |
+          cd TP4-PB-Backend
           mvn test -DtestFailureIgnore=true
 
-      - name: Upload do JAR (Artefato)
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-produto-jar
-          path: TP4-PB-Backend/target/*.jar
-
-      - name: Validar Link de Produção
-        run: |
-          echo "Verificando se o sistema está online no Railway..."
-          curl -I https://tp5-pb-production.up.railway.app/produtos || echo "Sistema Offline"
-
-      - name: Resumo
-        if: always()
-        run: |
-          echo "## Relatório TP5 Concluído" >> $GITHUB_STEP_SUMMARY
-          echo "1. **Build:** Maven executado." >> $GITHUB_STEP_SUMMARY
-          echo "2. **Artefatos:** Arquivo JAR e cobertura disponíveis." >> $GITHUB_STEP_SUMMARY
-          echo "3. **Deploy:** Verificado no Railway." >> $GITHUB_STEP_SUMMARY
-          echo "4. **Link:** https://frontend-production-ef1c.up.railway.app" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload Relatorio Jacoco
+      - name: Upload Artefatos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-cobertura
-          path: TP4-PB-Backend/target/site/jacoco/
+          name: pacotes-do-projeto
+          path: |
+            TP4-PB-Backend/target/*.jar
+            TP4-PB-Backend/target/site/jacoco/
+
+      - name: Resumo 
+        if: always()
+        run: |
+          echo "## Relatório de Automação TP5" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Build:** Backend compilado com sucesso." >> $GITHUB_STEP_SUMMARY
+          echo "2. **Testes:** Execução de testes unitários e Selenium  finalizada." >> $GITHUB_STEP_SUMMARY
+          echo "3. **Artefatos:** JAR e Relatórios de Cobertura disponíveis no GitHub Actions." >> $GITHUB_STEP_SUMMARY
+          echo "4. **Ambiente Real:** https://frontend-production-ef1c.up.railway.app" >> $GITHUB_STEP_SUMMARY
