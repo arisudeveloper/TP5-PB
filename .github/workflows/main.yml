@@ -1,0 +1,71 @@
+name: "workflow TP4"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build Backend JAR
+        run: |
+          cd TP4-PB-Backend
+          mvn clean package -DskipTests
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install and Run Services
+        run: |
+          cd TP4-PB-Frontend
+          npm install
+          npm run dev & 
+          
+          cd ../TP4-PB-Backend/target
+          nohup java -jar *.jar > backend-log.txt 2>&1 &
+          
+          echo "Aguardando serviços ficarem online..."
+          for i in {1..30}; do
+            if curl -s http://localhost:5173 > /dev/null && curl -s http://localhost:8080 > /dev/null; then
+              echo "Iniciando testes..."
+              exit 0
+            fi
+            echo "Attempt $i: Aguardando portas 5173 e 8080..."
+            sleep 10
+          done
+          echo "Erro: Os serviços não subiram a tempo."
+          exit 1
+
+      - name: Run Tests
+        run: |
+          cd TP4-PB-Backend
+          mvn test
+
+      - name: Debug Backend Logs
+        if: failure()
+        run: |
+          echo "--- LOG DO SPRING BOOT ---"
+          cat TP4-PB-Backend/target/backend-log.txt || echo "Log não encontrado"
+
+      - name: Upload Jacoco Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: TP4-PB-Backend/target/site/jacoco/
